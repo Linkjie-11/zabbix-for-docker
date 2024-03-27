@@ -1,0 +1,14 @@
+#在外置数据库中提前创建好数据库表和账号
+#创建和配置数据库和用户。
+mysql -uroot -p<password>
+mysql> create database zabbix character set utf8mb4 collate utf8mb4_bin;
+mysql> create user 'zabbix'@'IP' identified by '<password>';
+mysql> grant all privileges on zabbix.* to 'zabbix'@'localhost';
+mysql> SET GLOBAL log_bin_trust_function_creators = 1;
+mysql> quit;
+
+#将数据导入数据库
+mysql -uzabbix -p<password> zabbix < schema.sql
+
+#修改docker-compose文件内的数据库账号密码信息后启动docker-compose
+docker-compose up -d

@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  zabbix-server:
+    image: zabbix/zabbix-server-mysql:latest
+    restart: always
+    ports:
+      - "10051:10051"  # 暴露 Zabbix 服务器端口
+    environment:
+      - DB_SERVER_HOST=192.168.2.155
+      - MYSQL_USER=zabbix # zabbix连接数据库账号
+      - MYSQL_PASSWORD=zabbix # Zabbix连接数据库密码
+      - MYSQL_ROOT_PASSWORD=zabbix # 数据库root密码
+    networks:
+      - zabbix-network
+    volumes:
+      - /opt/zabbix:/var/lib/zabbix  # 持久化 Zabbix 服务器数据
+
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-mysql:latest
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_SERVER_HOST=192.168.2.155
+      - MYSQL_USER=zabbix
+      - MYSQL_PASSWORD=zabbix
+      - MYSQL_ROOT_PASSWORD=zabbix
+      - ZBX_SERVER_HOST=zabbix-server
+    depends_on:
+      - zabbix-server
+    networks:
+      - zabbix-network
+
+networks:
+  zabbix-network:
